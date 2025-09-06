@@ -48,20 +48,20 @@ def add_fill_column_to_df(df: DataFrame, column_name: str) -> DataFrame:
     df[column_name] = "fill"
     return df
 
-def populate_a6_value_in_other_df(a6_pairs: dict[str: list[int]], df: DataFrame, df_columns: list[str]) -> DataFrame:
-    if "Street Address" in df_columns and "a6" in df_columns:
+def populate_a6_value_in_other_df(a6_pairs: dict[str: list[int]], df: DataFrame, df_columns: list[str], target_column: str = "Street Address") -> DataFrame:
+    if target_column in df_columns and "a6" in df_columns:
         for index, row in df.iterrows():
             found_a6 = False
-            street_address = row["Street Address"]
+            target_column_value = row[target_column]
             for key in a6_pairs:
-                if key in street_address:
+                if key in target_column_value:
                     if len(a6_pairs[key]) == 1:
                         df.loc[index, "a6"] = a6_pairs[key][0]
                         found_a6 = True
                     else:
                         print("length of a6_pair is longer than 1")
             if not found_a6:
-                print(f"Street Address: {street_address} did not have a6 value, setting to 9999")
+                print(f"Street Address: {target_column_value} did not have a6 value, setting to 9999")
                 df.loc[index, "a6"] = 9999#row["a6"] = 9999
         
         return df
@@ -85,12 +85,13 @@ if __name__ == "__main__":
 
     a6_pairs = get_a6_pairs(df_columns=df_columns, df=df)
 
-    target_df = create_data_frame_from_xlsx(xlsx_path="test_Daphne District 5 Voter List 9.4.25.xlsx", sheet_name="Municipal Voters 8.26.25")
+    target_df = create_data_frame_from_xlsx(xlsx_path="test_Daphne District 5 Voter List 9.4.25.xlsx", sheet_name="Overall District 5")
 
     add_fill_column_to_df(df=target_df, column_name="a6")
     target_df_columns = get_dataframe_columns(df=target_df)
 
 
-    target_df = populate_a6_value_in_other_df(a6_pairs=a6_pairs, df=target_df, df_columns=target_df_columns)
 
-    save_pandas_dataframe_to_xlsx(df=target_df, filename="test.xlsx")
+    target_df = populate_a6_value_in_other_df(a6_pairs=a6_pairs, df=target_df, df_columns=target_df_columns, target_column="Residential Address Name")
+
+    save_pandas_dataframe_to_xlsx(df=target_df, filename="test_overall_district_5.xlsx")
