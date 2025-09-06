@@ -51,18 +51,26 @@ def add_fill_column_to_df(df: DataFrame, column_name: str) -> DataFrame:
 def populate_a6_value_in_other_df(a6_pairs: dict[str: list[int]], df: DataFrame, df_columns: list[str]) -> DataFrame:
     if "Street Address" in df_columns and "a6" in df_columns:
         for index, row in df.iterrows():
+            found_a6 = False
             street_address = row["Street Address"]
             for key in a6_pairs:
                 if key in street_address:
                     if len(a6_pairs[key]) == 1:
-                        row["a6"] = a6_pairs[key][0]
+                        df.loc[index, "a6"] = a6_pairs[key][0]
+                        found_a6 = True
                     else:
                         print("length of a6_pair is longer than 1")
-            if row["a6"] == "fill":
+            if not found_a6:
                 print(f"Street Address: {street_address} did not have a6 value, setting to 9999")
-                row["a6"] = 9999
+                df.loc[index, "a6"] = 9999#row["a6"] = 9999
         
         return df
+    
+
+def save_pandas_dataframe_to_xlsx(df: DataFrame, filename: str) -> None:
+    df.to_excel(filename, index=False, engine="openpyxl")
+
+    print(f"Converted DF to Excel Spreadsheet: {filename}")
             
     
 
@@ -83,4 +91,6 @@ if __name__ == "__main__":
     target_df_columns = get_dataframe_columns(df=target_df)
 
 
-    populate_a6_value_in_other_df(a6_pairs=a6_pairs, df=target_df, df_columns=target_df_columns)
+    target_df = populate_a6_value_in_other_df(a6_pairs=a6_pairs, df=target_df, df_columns=target_df_columns)
+
+    save_pandas_dataframe_to_xlsx(df=target_df, filename="test.xlsx")
