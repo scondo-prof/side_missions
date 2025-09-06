@@ -48,6 +48,25 @@ def add_fill_column_to_df(df: DataFrame, column_name: str) -> DataFrame:
     df[column_name] = "fill"
     return df
 
+def populate_a6_value_in_other_df(a6_pairs: dict[str: list[int]], df: DataFrame, df_columns: list[str]) -> DataFrame:
+    if "Street Address" in df_columns and "a6" in df_columns:
+        for index, row in df.iterrows():
+            street_address = row["Street Address"]
+            for key in a6_pairs:
+                if key in street_address:
+                    if len(a6_pairs[key]) == 1:
+                        row["a6"] = a6_pairs[key][0]
+                    else:
+                        print("length of a6_pair is longer than 1")
+            if row["a6"] == "fill":
+                print(f"Street Address: {street_address} did not have a6 value, setting to 9999")
+                row["a6"] = 9999
+        
+        return df
+            
+    
+
+
 
 
 
@@ -59,11 +78,9 @@ if __name__ == "__main__":
     a6_pairs = get_a6_pairs(df_columns=df_columns, df=df)
 
     target_df = create_data_frame_from_xlsx(xlsx_path="test_Daphne District 5 Voter List 9.4.25.xlsx", sheet_name="Municipal Voters 8.26.25")
-    df_columns = get_dataframe_columns(df=target_df)
-
-    print(f"Pre Add: {df_columns}")
 
     add_fill_column_to_df(df=target_df, column_name="a6")
-    df_columns = get_dataframe_columns(df=target_df)
+    target_df_columns = get_dataframe_columns(df=target_df)
 
-    print(f"Post Add: {df_columns}")
+
+    populate_a6_value_in_other_df(a6_pairs=a6_pairs, df=target_df, df_columns=target_df_columns)
